@@ -81,12 +81,13 @@ jobs:
           docker run --rm --platform linux/arm64 -v ${{ github.workspace }}:/work -w /work termux/termux-docker:aarch64 sh -c "
             pkg update && pkg install -y python binutils build-essential clang &&
             
-            # Create a mock ldd command to satisfy PyInstaller's setup check
-            echo '#!/bin/sh' > /usr/bin/ldd && 
-            echo 'echo \"not musl\" >&2' >> /usr/bin/ldd && 
-            chmod +x /usr/bin/ldd &&
+            # Put fake ldd in a writable location on PATH (PREFIX/bin is writable in Termux)
+            echo '#!/bin/sh' > \$PREFIX/bin/ldd &&
+            echo 'echo \"ldd (not musl)\" >&2' >> \$PREFIX/bin/ldd &&
+            chmod +x \$PREFIX/bin/ldd &&
             
-            export PYINSTALLER_COMPILE_BOOTLOADER=1 &&
+            # Skip bootloader compilation (use prebuilt), but ldd must exist first
+            export PYINSTALLER_COMPILE_BOOTLOADER=0 &&
             pip install pyinstaller click rich &&
             pyinstaller --onefile --name=warpshare-linux-bionic-aarch64 cli.py
           "
