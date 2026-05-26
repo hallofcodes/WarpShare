@@ -15,7 +15,7 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux-amd64
-            env: native
+            env: linux-native
             
           - os: ubuntu-latest
             target: linux-musl-aarch64
@@ -23,7 +23,7 @@ jobs:
 
           - os: windows-latest
             target: windows-amd64
-            env: native
+            env: windows-native
 
           - os: ubuntu-latest
             target: linux-bionic-aarch64
@@ -33,32 +33,37 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # --- NATIVE ENVIRONMENTS (Linux x86_64, Windows x86_64) ---
+      # --- SETUP PYTHON FOR NATIVE RUNNERS ---
       - name: Set up Python
-        if: ${{ matrix.env == 'native' }}
+        if: ${{ matrix.env == 'linux-native' || matrix.env == 'windows-native' }}
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Build Native Binaries
-        if: ${{ matrix.env == 'native' }}
+      # --- LINUX NATIVE BUILD ---
+      - name: Build Linux AMD64 Binary
+        if: ${{ matrix.env == 'linux-native' }}
         run: |
           pip install pyinstaller click rich
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            pyinstaller --onefile --name=warpshare-windows-amd64 cli.py
-          else
-            pyinstaller --onefile --name=warpshare-linux-amd64 cli.py
-          fi
+          pyinstaller --onefile --name=warpshare-linux-amd64 cli.py
 
-      # --- ALPINE ENVIROMENT (ARM64 / musl) ---
-      - name: Set up QEMU Emulation
+      # --- WINDOWS NATIVE BUILD (Using PowerShell syntax) ---
+      - name: Build Windows AMD64 Binary
+        if: ${{ matrix.env == 'windows-native' }}
+        shell: pwsh
+        run: |
+          pip install pyinstaller click rich
+          pyinstaller --onefile --name=warpshare-windows-amd64 cli.py
+
+      # --- ALPINE ENVIRONMENT (ARM64 / musl) ---
+      - name: Set up QEMU Emulation for Alpine
         if: ${{ matrix.env == 'alpine' }}
         uses: docker/setup-qemu-action@v3
 
       - name: Build Alpine Binary
         if: ${{ matrix.env == 'alpine' }}
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work arm64v8/alpine:latest sh -c "
+          docker run --rm --platform linux/arm64 -v ${{ github.workspace }}:/work -w /work arm64v8/alpine:latest sh -c "
             apk add --no-cache python3 py3-pip binutils build-essential python3-dev &&
             python3 -m venv venv &&
             ./venv/bin/pip install pyinstaller click rich &&
@@ -66,20 +71,32 @@ jobs:
           "
 
       # --- TERMUX ENVIRONMENT (ARM64 / bionic) ---
+      - name: Set up QEMU Emulation for Termux
+        if: ${{ matrix.env == 'termux' }}
+        uses: docker/setup-qemu-action@v3
+
       - name: Build Termux Binary
         if: ${{ matrix.env == 'termux' }}
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work termux/termux-docker:aarch64 sh -c "
+          docker run --rm --platform linux/arm64 -v ${{ github.workspace }}:/work -w /work termux/termux-docker:aarch64 sh -c "
             pkg update && pkg install -y python binutils build-essential clang &&
             pip install pyinstaller click rich &&
             pyinstaller --onefile --name=warpshare-linux-bionic-aarch64 cli.py
           "
 
       # --- STAGE BINARIES ---
-      - name: Stage Artifacts
+      - name: Stage Artifacts (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           mkdir -p staging_binaries
-          cp dist/warpshare-* staging_binaries/ 2>/dev/null || cp dist/warpshare-*.exe staging_binaries/ 2>/dev/null
+          cp dist/warpshare-* staging_binaries/ 2>/dev/null || true
+
+      - name: Stage Artifacts (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path staging_binaries
+          Copy-Item -Path dist\warpshare-*.exe -Destination staging_binaries\ -ErrorAction SilentlyContinue
 
       - name: Upload Intermediary Artifacts
         uses: actions/upload-artifact@v4
@@ -105,19 +122,15 @@ jobs:
       - name: Organize and Commit to Binaries Folder
         run: |
           mkdir -p binaries
-          
-          # Flatten downloaded artifacts into the target binaries directory
           find tmp_binaries -type f -exec cp {} binaries/ \;
           
-          # Configure Git
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Commit modifications directly back to the active repository branch
           git add binaries/
           if git diff --staged --quiet; then
             echo "No new changes detected in compiled binaries."
           else
             git commit -m "chore: automated compilation update for project binaries [skip ci]"
             git push origin HEAD:${{ github.ref_name }}
-          find
+          fi
