@@ -1,7 +1,7 @@
 :root {
     /*Background*/
-    --deep-back: hsl(233, 60%, 6%);
-    --surface: hsl(233, 48%, 10%);
+    --deep-back: hsl(228, 34%, 9%);
+    --surface: #141728;
     --elevated-surface: #141830;
 
     /*Accent*/
@@ -17,7 +17,10 @@
     --border-color: hsla(233, 84%, 67%, 0.149);
     --border-hover: rgba(99, 102, 241, 0.40);
 
+    /* Status */
     --success: #10b981;
+    --danger: #ef4444;
+    --danger-low: rgba(239, 68, 68, 0.10);
 }
 * {
     margin: 0;
@@ -30,7 +33,7 @@
 
 body {
     height: 100dvh;
-    background: radial-gradient(circle 100px at 40% 50%, var(--surface) 0%, var(--deep-back) 200%);
+    background-color: var(--deep-back);
 }
 
 .top-nav {
@@ -183,6 +186,7 @@ button {
 }
 
 .icon {
+    position: relative;
     width: 100%;
     height: 7rem;
     padding: 1rem;
@@ -206,11 +210,129 @@ button {
         font-size: 0.7rem;
         color: var(--muted-text);
     }
+    .buttons {
+        position: absolute;
+        display: none;
+        justify-content: space-evenly;
+        align-items: center;
+        top: 10%;
+        left: 45%;
+        width: 5.2rem;
+        height: 1.7rem;
+        button {
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--elevated-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 0.5rem;
+            &:hover {
+                border-color: var(--border-hover);
+                background-color: var(--accent-low);
+                svg {
+                    fill: var(--main-accent);
+                }
+            }
+        }
+        .delete:hover {
+            border-color: var(--danger);
+            background-color: var(--danger-low);
+            svg {
+                fill: var(--danger);
+            }
+        }
+    }
+    &:hover {
+        cursor: pointer;
+        border-color: var(--border-hover);
+        background-color: var(--accent-low);
+        .buttons {
+            display: flex;
+        }
+    }
 }
 
-#files {
+.grid-view {
     padding: 1.5rem;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1rem;
+}
+.list-view {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    .icon {
+        flex-direction: row;
+        justify-content: space-between;
+        height: 4rem;
+        .thumbnail {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .buttons {
+            display: none;
+        }
+    }
+}
+
+#menu {
+    position: absolute;
+    display: none;
+    flex-direction: column;
+    transition: none;
+    width: 7.5rem;
+    height: 7.5rem;
+    background-color: var(--elevated-surface);
+    border: 1px solid var(--border-hover);
+    border-radius: 8px;
+    padding: 0.3rem;
+    gap: 0.2rem;
+    button {
+        width: 100%;
+        background: none;
+        height: 2rem;
+        justify-content: flex-start;
+        padding-left: 4px;
+        p {
+            display: flex;
+            gap: 0.3rem;
+            svg {
+                fill: var(--primary-text);
+            }
+        }
+        &:hover {
+            background-color: var(--accent-low);
+            p {
+                color: var(--main-accent);
+                svg {
+                    fill: var(--main-accent);
+                }
+            };
+        }
+    }
+    .delete {
+        position: relative;
+        margin-top: 4px;
+        &:hover {
+            background-color: var(--danger-low);
+            p {
+                color: var(--danger);
+                svg {
+                    fill: var(--danger);
+                }
+            };
+        }
+        &::after {
+            position: absolute;
+            content: "";
+            top: -4px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--border-color);
+        }
+    }
 }
