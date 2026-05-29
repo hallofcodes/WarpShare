@@ -1,0 +1,119 @@
+name: Push CLI Binaries
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-amd64
+            env: linux-native
+
+          - os: ubuntu-latest
+            target: linux-musl-aarch64
+            env: alpine
+
+          - os: windows-latest
+            target: windows-amd64
+            env: windows-native
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # --- SETUP PYTHON FOR NATIVE RUNNERS ---
+      - name: Set up Python
+        if: ${{ matrix.env == 'linux-native' || matrix.env == 'windows-native' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # --- LINUX NATIVE BUILD ---
+      - name: Build Linux AMD64 Binary
+        if: ${{ matrix.env == 'linux-native' }}
+        run: |
+          pip install -r requirements.txt
+          pyinstaller --onefile --name=warpshare-linux-amd64 cli.py
+
+      # --- WINDOWS NATIVE BUILD (Using PowerShell syntax) ---
+      - name: Build Windows AMD64 Binary
+        if: ${{ matrix.env == 'windows-native' }}
+        shell: pwsh
+        run: |
+          pip install -r requirements.txt
+          pyinstaller --onefile --name=warpshare-windows-amd64 cli.py
+
+      # --- ALPINE ENVIRONMENT (ARM64 / musl) ---
+      - name: Set up QEMU Emulation for Alpine
+        if: ${{ matrix.env == 'alpine' }}
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build Alpine Binary
+        if: ${{ matrix.env == 'alpine' }}
+        run: |
+          docker run --rm --platform linux/arm64 -v ${{ github.workspace }}:/work -w /work arm64v8/alpine:latest sh -c "
+            apk add --no-cache python3 py3-pip binutils build-base python3-dev &&
+            python3 -m venv venv &&
+            source ./venv/bin/activate &&
+            ./venv/bin/pip install -r requirements.txt &&
+            ./venv/bin/pyinstaller --onefile --name=warpshare-linux-musl-aarch64 cli.py
+          "
+
+      # --- STAGE BINARIES ---
+      - name: Stage Artifacts (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          mkdir -p staging_binaries
+          cp dist/warpshare-* staging_binaries/ 2>/dev/null || true
+
+      - name: Stage Artifacts (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path staging_binaries
+          Copy-Item -Path dist\warpshare-*.exe -Destination staging_binaries\ -ErrorAction SilentlyContinue
+
+      - name: Upload Intermediary Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}-raw
+          path: staging_binaries/
+
+  commit-binaries:
+    name: Commit Binaries to Repository
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download All Built Binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: tmp_binaries
+
+      - name: Organize and Commit to Binaries Folder
+        run: |
+          mkdir -p binaries
+          find tmp_binaries -type f -exec cp {} binaries/ \;
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add binaries/
+          if git diff --staged --quiet; then
+            echo "No new changes detected in compiled binaries."
+          else
+            git commit -m "chore: automated compilation update for project binaries [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
