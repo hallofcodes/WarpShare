@@ -43,7 +43,7 @@ jobs:
           pip install -r requirements.txt
           pyinstaller --onefile --name=warpshare-linux-amd64 cli.py
 
-      # --- WINDOWS NATIVE BUILD (Using PowerShell syntax) ---
+      # --- WINDOWS NATIVE BUILD ---
       - name: Build Windows AMD64 Binary
         if: ${{ matrix.env == 'windows-native' }}
         shell: pwsh
@@ -86,34 +86,31 @@ jobs:
         with:
           name: ${{ matrix.target }}-raw
           path: staging_binaries/
+          retention-days: 1
 
-  commit-binaries:
-    name: Commit Binaries to Repository
+  release:
+    name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Download All Built Binaries
         uses: actions/download-artifact@v4
         with:
-          path: tmp_binaries
+          path: release_binaries
+          merge-multiple: true
 
-      - name: Organize and Commit to Binaries Folder
-        run: |
-          mkdir -p binaries
-          find tmp_binaries -type f -exec cp {} binaries/ \;
-          
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add binaries/
-          if git diff --staged --quiet; then
-            echo "No new changes detected in compiled binaries."
-          else
-            git commit -m "chore: automated compilation update for project binaries [skip ci]"
-            git push origin HEAD:${{ github.ref_name }}
-          fi
+      - name: Generate Dynamic Tag Name
+        id: tag
+        run: echo "version=v1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+      - name: Create and Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.version }}
+          name: Release ${{ steps.tag.outputs.version }}
+          body: "Automated compilation update for project binaries."
+          draft: false
+          prerelease: false
+          files: release_binaries/*
