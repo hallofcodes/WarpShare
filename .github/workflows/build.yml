@@ -16,7 +16,7 @@ jobs:
           - os: ubuntu-latest
             target: linux-amd64
             env: linux-native
-            
+ 
           - os: ubuntu-latest
             target: linux-musl-aarch64
             env: alpine
@@ -24,10 +24,6 @@ jobs:
           - os: windows-latest
             target: windows-amd64
             env: windows-native
-
-          - os: ubuntu-latest
-            target: linux-bionic-aarch64
-            env: termux
 
     steps:
       - name: Checkout Source Code
