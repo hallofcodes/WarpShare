@@ -1,62 +1,144 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WarpShare</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/css/styles.css" />
-</head>
-<body>
-    <div id="app">
-        <nav class="top-nav">
-            <div class="left">
-                <div class="dot"></div>
-                <h1 class="logo"><a href="#">WARPSHARE</a></h1>
-                <p class="path"><span class="dir">~</span> / <span class="dir">Documents</span> / <span class="dir">Projects</span></p>
-            </div>
-            <div class="right">
-                <button class="upload">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#e8eaf2"><path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg>
-                    Upload
-                </button>
-                <button class="new-folder">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e8eaf2"><path d="M576-324h72v-72h72v-72h-72v-72h-72v72h-72v72h72v72ZM168-192q-29 0-50.5-21.5T96-264v-432q0-29.7 21.5-50.85Q139-768 168-768h216l96 96h312q29.7 0 50.85 21.15Q864-629.7 864-600v336q0 29-21.15 50.5T792-192H168Zm0-72h624v-336H450l-96-96H168v432Zm0 0v-432 432Z"/></svg>
-                    New Folder
-                </button>
-                <div class="view">
-                    <button class="grid active" onclick="view('grid', event)">
-                        <p><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#6b7280"><path d="M144-528v-288h288v288H144Zm0 384v-288h288v288H144Zm384-384v-288h288v288H528Zm0 384v-288h288v288H528ZM216-600h144v-144H216v144Zm384 0h144v-144H600v144Zm0 384h144v-144H600v144Zm-384 0h144v-144H216v144Zm384-384Zm0 240Zm-240 0Zm0-240Z"/></svg></p>
-                    </button>
-                    <button class="list" onclick="view('list')">
-                        <p><svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#6b7280"><path d="M144-144v-72h672v72H144Zm0-300v-72h672v72H144Zm0-300v-72h672v72H144Z"/></svg></p>
-                    </button>
-                </div>
-            </div>
-        </nav>
-        <nav class="search-nav">
-            <div class="search-bar">
-                <input type="search" placeholder="Search files . . .">
-                <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" height="16px" viewBox="0 -960 960 960" width="16px" fill="#6b7280"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
-            </div>
-            <p id="items">0 items</p>
-        </nav>
-        <div id="files" class="grid-view">
-
-        </div>
-        <div id="menu">
-            <button>
-                <p><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#6b7280"><path d="M480-336 288-528l51-51 105 105v-342h72v342l105-105 51 51-192 192ZM263.72-192Q234-192 213-213.15T192-264v-72h72v72h432v-72h72v72q0 29.7-21.16 50.85Q725.68-192 695.96-192H263.72Z"/></svg> Download</p>
-            </button>
-            <button>
-                <p><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#6b7280"><path d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z"/></svg> Edit</p>
-            </button>
-            <button class='delete'>
-                <p><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#6b7280"><path d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z"/></svg> Delete</p>
-            </button>
-        </div>
-    </div>
-    <script src="/static/js/index.js"></script>
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{{ title }}</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+			rel="stylesheet" />
+		<link rel="stylesheet" href="/static/css/styles.css" />
+	</head>
+	<body>
+		<div id="app">
+			<nav class="top-nav">
+				<div class="left">
+					<div class="dot"></div>
+					<h1 class="logo"><a href="#">{{ display_name }}</a></h1>
+					<p class="path">
+						<span class="dir">~</span> /
+						<span class="dir">Documents</span> /
+						<span class="dir">Projects</span>
+					</p>
+				</div>
+				<div class="right">
+					<button class="upload">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							height="18px"
+							viewBox="0 -960 960 960"
+							width="18px"
+							fill="#e8eaf2">
+							<path
+								d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+						</svg>
+						Upload
+					</button>
+					<button class="new-folder">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							height="20px"
+							viewBox="0 -960 960 960"
+							width="20px"
+							fill="#e8eaf2">
+							<path
+								d="M576-324h72v-72h72v-72h-72v-72h-72v72h-72v72h72v72ZM168-192q-29 0-50.5-21.5T96-264v-432q0-29.7 21.5-50.85Q139-768 168-768h216l96 96h312q29.7 0 50.85 21.15Q864-629.7 864-600v336q0 29-21.15 50.5T792-192H168Zm0-72h624v-336H450l-96-96H168v432Zm0 0v-432 432Z" />
+						</svg>
+						New Folder
+					</button>
+					<div class="view">
+						<button class="grid active" onclick="view('grid', event)">
+							<p>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									height="20px"
+									viewBox="0 -960 960 960"
+									width="20px"
+									fill="#6b7280">
+									<path
+										d="M144-528v-288h288v288H144Zm0 384v-288h288v288H144Zm384-384v-288h288v288H528Zm0 384v-288h288v288H528ZM216-600h144v-144H216v144Zm384 0h144v-144H600v144Zm0 384h144v-144H600v144Zm-384 0h144v-144H216v144Zm384-384Zm0 240Zm-240 0Zm0-240Z" />
+								</svg>
+							</p>
+						</button>
+						<button class="list" onclick="view('list')">
+							<p>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									height="18px"
+									viewBox="0 -960 960 960"
+									width="18px"
+									fill="#6b7280">
+									<path
+										d="M144-144v-72h672v72H144Zm0-300v-72h672v72H144Zm0-300v-72h672v72H144Z" />
+								</svg>
+							</p>
+						</button>
+					</div>
+				</div>
+			</nav>
+			<nav class="search-nav">
+				<div class="search-bar">
+					<input type="search" placeholder="Search files . . ." />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="search-icon"
+						height="16px"
+						viewBox="0 -960 960 960"
+						width="16px"
+						fill="#6b7280">
+						<path
+							d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+					</svg>
+				</div>
+				<p id="items">0 items</p>
+			</nav>
+			<div id="files" class="grid-view"></div>
+			<div id="menu">
+				<button>
+					<p>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							height="20px"
+							viewBox="0 -960 960 960"
+							width="20px"
+							fill="#6b7280">
+							<path
+								d="M480-336 288-528l51-51 105 105v-342h72v342l105-105 51 51-192 192ZM263.72-192Q234-192 213-213.15T192-264v-72h72v72h432v-72h72v72q0 29.7-21.16 50.85Q725.68-192 695.96-192H263.72Z" />
+						</svg>
+						Download
+					</p>
+				</button>
+				<button>
+					<p>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							height="20px"
+							viewBox="0 -960 960 960"
+							width="20px"
+							fill="#6b7280">
+							<path
+								d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z" />
+						</svg>
+						Edit
+					</p>
+				</button>
+				<button class="delete">
+					<p>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							height="20px"
+							viewBox="0 -960 960 960"
+							width="20px"
+							fill="#6b7280">
+							<path
+								d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z" />
+						</svg>
+						Delete
+					</p>
+				</button>
+			</div>
+		</div>
+		<script src="/static/js/index.js"></script>
+	</body>
 </html>
