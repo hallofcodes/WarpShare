@@ -1,4 +1,4 @@
-shared_path: str = "/"
+shared_path: str = ""
 
 def save_user_current_shared_path(path: str):
    shared_path = path
