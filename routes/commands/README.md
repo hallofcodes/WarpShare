@@ -3,8 +3,8 @@
 All request and response bodies use JSON unless specified otherwise.
 
 ### 1. List Current Working Directory
-
 - **Endpoint:** `GET /cwd`
+
 - **Response:** (Plain text) The current working directory path.
 
 ### 2. List Files and Directories
