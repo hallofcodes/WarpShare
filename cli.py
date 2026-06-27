@@ -1,5 +1,7 @@
 import os
 import typer
+import stores.user_current_shared_path as shared_path
+import stores.share_status as share_status
 from server import create_app
 from waitress import serve
 from rich.console import Console
@@ -17,9 +19,11 @@ console = Console()
 
 
 
-def start_server(host: str, port: int):
+def start_server(host: str, port: int, path: str):
    app = create_app()
+   shared_path.path = path
    serve(app, host=host, port=port)
+   # app.run(debug=True)
 
 # LOCAL SHARE
 
@@ -31,6 +35,7 @@ def local_share(
    """
    Share files instantly with anyone on your local Wi-Fi network.
    """
+
    if not os.path.exists(path):
       console.print(f"[bold red][Error][/bold red] Path '{path}' does not exist.")
       raise typer.Exit(code=1)
@@ -46,9 +51,9 @@ def local_share(
 
    confirm_to_share_secrets_in_cwd(path)
 
+   share_status.status = "Offline"
    console.print(f"\n[bold green]Local Sharing Server started at http://{ip}:{port}[/bold green]")
-
-   start_server(ip, port)
+   start_server(ip, port, path)
 
 # ONLINE SHARE
 
@@ -72,7 +77,8 @@ def remote_share(
    confirm_to_share_secrets_in_cwd(path)
 
    host = "127.0.0.1"
-   t = threading.Thread(target=start_server, args=(host, port), daemon=True)
+   share_status.status = "Online"
+   t = threading.Thread(target=start_server, args=(host, port, path), daemon=True)
    t.start()
 
    console.print(f"[bold cyan]Server started, creating remote tunnel...[/bold cyan]")
