@@ -155,12 +155,14 @@ button:hover {
    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.28);
 }
 
+.new-file,
 .new-folder,
 .view {
    background: var(--surface);
    border: 1px solid var(--border-color);
 }
 
+.new-file:hover,
 .new-folder:hover,
 .view button:hover {
    border-color: var(--border-hover);
@@ -516,14 +518,16 @@ button:hover {
    }
    .top-nav .right {
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      grid-template-columns: 1fr 1fr 1fr auto;
       gap: 0.5rem;
    }
    .upload,
+   .new-file,
    .new-folder {
       width: 100%;
    }
    .upload span,
+   .new-file span,
    .new-folder span,
    .hint {
       display: none;
@@ -582,7 +586,7 @@ button:hover {
       grid-template-columns: 1fr;
    }
    .top-nav .right {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
    }
    .view {
       grid-column: 1 / -1;
