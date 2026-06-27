@@ -12,10 +12,12 @@ def command():
 
       items = []
       for entry in os.scandir(target_dir):
-         items.append({
-            "name": entry.name,
-            "type": "dir" if entry.is_dir() else "file"
-         })
+          items.append({
+             "name": entry.name,
+             "type": "dir" if entry.is_dir() else "file",
+             "size": None if entry.is_dir() else entry.stat().st_size,
+             "modified": entry.stat().st_mtime
+          })
 
       return jsonify(items)
 
