@@ -1,6 +1,7 @@
 import os
 import typer
 import stores.user_current_shared_path as shared_path
+import stores.share_status as share_status
 from server import create_app
 from waitress import serve
 from rich.console import Console
@@ -50,8 +51,8 @@ def local_share(
 
    confirm_to_share_secrets_in_cwd(path)
 
+   share_status.status = "Offline"
    console.print(f"\n[bold green]Local Sharing Server started at http://{ip}:{port}[/bold green]")
-
    start_server(ip, port, path)
 
 # ONLINE SHARE
@@ -76,6 +77,7 @@ def remote_share(
    confirm_to_share_secrets_in_cwd(path)
 
    host = "127.0.0.1"
+   share_status.status = "Online"
    t = threading.Thread(target=start_server, args=(host, port, path), daemon=True)
    t.start()
 
