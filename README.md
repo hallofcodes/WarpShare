@@ -1,6 +1,5 @@
 # WarpShare
 
-#
 
 WarpShare lets someone share files directly from their own device and give another person a link to browse, download, and work with those files immediately.
 
@@ -18,19 +17,19 @@ Built executables:
 - `warpshare-linux-musl-aarch64`
 - `warpshare-windows-amd64.exe`
 
-Quick install with script:
+Quick install:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hallofcodes/WarpShare/master/install.sh | bash
 ```
 
-If `curl` is not available:
+If curl is not available:
 
 ```bash
 wget -qO- https://raw.githubusercontent.com/hallofcodes/WarpShare/master/install.sh | bash
 ```
 
-Manual install
+Manual install:
 
 Linux x64:
 
@@ -57,7 +56,7 @@ Invoke-WebRequest -Uri https://github.com/hallofcodes/WarpShare/releases/latest/
 Start-Process .\warpshare.exe
 ```
 
-To keep it as a global command on Windows, move it to a folder already in your `Path`, or create one:
+Windows global command:
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\bin" | Out-Null
