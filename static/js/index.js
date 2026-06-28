@@ -3,6 +3,7 @@ const itemsCount = document.getElementById('items')
 const searchInput = document.querySelector('.search-bar input')
 const breadcrumb = document.querySelector('.path')
 const menu = document.getElementById('menu')
+const newFileBtn = document.querySelector('.new-file')
 const newFolderBtn = document.querySelector('.new-folder')
 
 let currentPath = '.'
@@ -188,6 +189,17 @@ document.body.addEventListener('click', () => {
 })
 
 searchInput.addEventListener('input', renderFiles)
+
+newFileBtn.addEventListener('click', async () => {
+   const name = prompt('File name')
+   if (!name) return
+
+   await api('/commands/touch', {
+      method: 'POST',
+      body: JSON.stringify({ path: joinPath(currentPath, name) })
+   })
+   loadFiles(currentPath)
+})
 
 newFolderBtn.addEventListener('click', async () => {
    const name = prompt('Folder name')
